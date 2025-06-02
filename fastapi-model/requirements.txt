@@ -1,7 +1,7 @@
-gdown
 fastapi
 uvicorn[standard]
 tensorflow
 pillow
 numpy
+gdown
 python-multipart

@@ -7,8 +7,9 @@ from PIL import Image
 import numpy as np
 import io
 import os
-import gdown  # pastikan sudah install gdown di requirements.txt
+import gdown 
 import logging
+from mangum import Mangum
 
 app = FastAPI()
 
@@ -67,3 +68,5 @@ async def predict(file: UploadFile = File(...)):
 @app.get("/")
 async def root():
     return {"message": "API FastAPI berjalan"}
+
+handler = Mangum(app)
