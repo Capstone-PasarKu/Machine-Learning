@@ -7,10 +7,11 @@ from PIL import Image
 import numpy as np
 import io
 import os
+import gdown  # pastikan sudah install gdown di requirements.txt
+import logging
 
 app = FastAPI()
 
-# Middleware CORS agar bisa diakses dari frontend/web
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -18,19 +19,32 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load model dari folder 'model'
-model_path = os.path.join("model", "model_84.h5")
-model = load_model(model_path)
+MODEL_DIR = "model"
+MODEL_PATH = os.path.join(MODEL_DIR, "model_84.h5")
+GDRIVE_URL = "https://drive.google.com/uc?id=1u7WfOS0SvGGtcjRSQDGjPfvjgI1D3HII"  # link unduhan Google Drive
 
-# Fungsi preprocessing gambar
+# Fungsi untuk download model jika belum ada
+def download_model():
+    if not os.path.exists(MODEL_PATH):
+        os.makedirs(MODEL_DIR, exist_ok=True)
+        logging.info("Model tidak ditemukan, mulai download dari Google Drive...")
+        gdown.download(GDRIVE_URL, MODEL_PATH, quiet=False)
+    else:
+        logging.info("Model sudah ada, skip download.")
+
+# Download model saat startup
+download_model()
+
+# Load model
+model = load_model(MODEL_PATH)
+
 def preprocess_image(image_bytes):
     img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-    img = img.resize((224, 224))  # Ukuran harus sesuai dengan saat training
+    img = img.resize((224, 224))
     img_array = img_to_array(img) / 255.0
-    img_array = np.expand_dims(img_array, axis=0)  # (1, 224, 224, 3)
+    img_array = np.expand_dims(img_array, axis=0)
     return img_array
 
-# Endpoint prediksi
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
     try:
@@ -47,4 +61,9 @@ async def predict(file: UploadFile = File(...)):
         })
 
     except Exception as e:
+        logging.error(f"Prediction error: {e}")
         return JSONResponse(status_code=500, content={"error": str(e)})
+
+@app.get("/")
+async def root():
+    return {"message": "API FastAPI berjalan"}
