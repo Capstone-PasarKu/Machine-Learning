@@ -1,17 +1,7 @@
-# Virtual environment
-fastapi-model/venv/
+venv/
 __pycache__/
 *.pyc
-
-# Byte-compiled / optimized / DLL files
-*.py[cod]
-*$py.class
-
-# TensorFlow / TFLite model (kalau mau exclude besar)
-# Kalau model_84.tflite ingin kamu push, jangan di-ignore.
-# Kalau mau exclude bisa tambahkan baris ini:
-# fastapi-model/model/model_84.tflite
-
-# IDE / editor files (opsional)
-.vscode/
-.idea/
+*.pyo
+*.pyd
+*.sqlite3
+*.log
