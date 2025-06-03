@@ -1,23 +1,17 @@
-# Python cache
-__pycache__/
-*.py[cod]
-
 # Virtual environment
-venv/
 fastapi-model/venv/
+__pycache__/
+*.pyc
 
-# System files
-.DS_Store
-Thumbs.db
+# Byte-compiled / optimized / DLL files
+*.py[cod]
+*$py.class
 
-# IDE/editor configs
+# TensorFlow / TFLite model (kalau mau exclude besar)
+# Kalau model_84.tflite ingin kamu push, jangan di-ignore.
+# Kalau mau exclude bisa tambahkan baris ini:
+# fastapi-model/model/model_84.tflite
+
+# IDE / editor files (opsional)
 .vscode/
 .idea/
-
-# Logs/temp
-*.log
-*.tmp
-*.swp
-
-# Jupyter notebooks (optional)
-.ipynb_checkpoints/
