@@ -1,0 +1,23 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+fastapi-model/venv/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE/editor configs
+.vscode/
+.idea/
+
+# Logs/temp
+*.log
+*.tmp
+*.swp
+
+# Jupyter notebooks (optional)
+.ipynb_checkpoints/
