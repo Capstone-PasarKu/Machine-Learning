@@ -2,9 +2,17 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras.applications import MobileNetV2
 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input, decode_predictions
+import logging
 
-# Load MobileNetV2 dari ImageNet
-mobilenet = MobileNetV2(weights="imagenet")
+logging.basicConfig(level=logging.INFO)
+
+# Load MobileNetV2 dengan weights ImageNet
+try:
+    mobilenet = MobileNetV2(weights="imagenet")
+    logging.info("MobileNetV2 berhasil dimuat.")
+except Exception as e:
+    logging.error(f"Gagal memuat MobileNetV2: {e}")
+    raise e
 
 keyword_to_category = {
     'meat': 'meat', 'beef': 'meat', 'pork': 'meat', 'chicken': 'meat', 'steak': 'meat',
@@ -20,19 +28,34 @@ keyword_to_category = {
 }
 
 def validate_market_image(img_array):
-    img_resized = tf.image.resize(img_array, (224, 224))
-    img_batch = np.expand_dims(img_resized, axis=0)
-    img_preprocessed = preprocess_input(img_batch * 255)
+    try:
+        # Pastikan input adalah float32 numpy array dengan shape (224,224,3)
+        if not isinstance(img_array, np.ndarray):
+            logging.warning("Input bukan numpy array")
+            return "unknown"
+        if img_array.shape != (224, 224, 3):
+            logging.warning(f"Input shape tidak sesuai: {img_array.shape}")
+            return "unknown"
 
-    preds = mobilenet.predict(img_preprocessed)
-    decoded = decode_predictions(preds, top=3)[0]
+        img_resized = tf.image.resize(img_array, (224, 224))
+        img_batch = np.expand_dims(img_resized, axis=0)
+        img_preprocessed = preprocess_input(img_batch * 255.0)
 
-    for _, label, _ in decoded:
-        label_lower = label.lower()
-        for keyword, category in keyword_to_category.items():
-            if keyword in label_lower:
-                print(f"Gambar terdeteksi sebagai kategori: {category}")
-                return category
+        preds = mobilenet.predict(img_preprocessed)
+        decoded = decode_predictions(preds, top=5)[0]
 
-    print("PERINGATAN: Gambar tidak dikenali.")
-    return None
+        logging.info(f"Hasil prediksi top-5: {decoded}")
+
+        for _, label, prob in decoded:
+            label_lower = label.lower()
+            for keyword, category in keyword_to_category.items():
+                if keyword in label_lower:
+                    logging.info(f"Gambar dikenali sebagai: {label_lower}, kategori: {category}")
+                    return category
+
+        logging.info("Kategori tidak dikenali, fallback ke 'unknown'")
+        return "unknown"
+
+    except Exception as e:
+        logging.error(f"Error saat validasi gambar: {e}")
+        return "unknown"
